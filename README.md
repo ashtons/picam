@@ -17,6 +17,8 @@ Returns a PIL Image object
     
     ii = picam.takePhotoWithDetails(640,480, 85)
     
+    picam.LEDOn()
+    picam.LEDOff()
 
 Installation
 ------------
