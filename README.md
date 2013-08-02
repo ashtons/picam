@@ -17,3 +17,9 @@ Returns a PIL Image object
     
     ii = picam.takePhotoWithDetails(640,480, 85)
     
+
+Installation
+------------
+Download the package folder and run the setup command to install the script
+
+    python setup.py install
