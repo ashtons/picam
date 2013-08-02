@@ -4,16 +4,22 @@ import _picam
 import StringIO
 from PIL import Image
 import RPi.GPIO as GPIO
+GPIO_AVAILABLE = True
 
-#add disable_camera_led=1 to config.txt to have control over the LED
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(5, GPIO.OUT, initial=False) 
+try:
+    #add disable_camera_led=1 to config.txt to have control over the LED
+    GPIO.setwarnings(False)
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(5, GPIO.OUT, initial=False) 
+except:
+    GPIO_AVAILABLE = False
 
 def LEDOn():
-    GPIO.output(5,True)
+    if GPIO_AVAILABLE:
+        GPIO.output(5,True)
 def LEDOff():
-    GPIO.output(5,False)
+    if GPIO_AVAILABLE:
+        GPIO.output(5,False)
     
 def takePhoto():
     s = _picam.takePhoto()
