@@ -40,6 +40,10 @@ def takePhotoWithDetails(width, height, quality):
     i = Image.open(ss)
     return i 
     
+def recordVideoWithDetails(filename,width, height, duration):
+    _picam.recordVideoWithDetails(filename, width, height, duration)
+
+    
 def saveRGBToImage(rgb_list, filename, width, height):
     im = Image.new("RGB", (width, height), "white")
     draw  =  ImageDraw.Draw(im)
