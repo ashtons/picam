@@ -18,7 +18,7 @@ Returns a PIL Image object
     
     ii = picam.takePhotoWithDetails(640,480, 85)
     
-    filename = "/Data/rpi/picam-%s.h264" % time.strftime("%Y%m%d-%H%M%S")
+    filename = "/tmp/picam-%s.h264" % time.strftime("%Y%m%d-%H%M%S")
     picam.recordVideoWithDetails(filename,640,480,5000)
     
     picam.LEDOn()
