@@ -5,6 +5,7 @@ import StringIO
 from PIL import Image
 import ImageDraw
 import RPi.GPIO as GPIO
+import os
 GPIO_AVAILABLE = True
 
 try:
@@ -40,9 +41,12 @@ def takePhotoWithDetails(width, height, quality):
     i = Image.open(ss)
     return i 
     
-def recordVideoWithDetails(filename,width, height, duration):
-    _picam.recordVideoWithDetails(filename, width, height, duration)
-
+def recordVideoWithDetails(filename, width, height, duration):
+    directory = os.path.dirname(filename)
+    if os.path.exists(directory):
+        _picam.recordVideoWithDetails(filename, width, height, duration)
+    else:
+        raise Exception("Path does not exist!")
     
 def saveRGBToImage(rgb_list, filename, width, height):
     im = Image.new("RGB", (width, height), "white")
