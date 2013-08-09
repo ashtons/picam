@@ -1,12 +1,14 @@
 # Copyright (c) 2013 Sean Ashton
 # Licensed under the terms of the MIT License (see LICENSE.txt)
-import _picam
+from _picam import *
 import StringIO
 from PIL import Image
 import ImageDraw
 import RPi.GPIO as GPIO
 import os
 GPIO_AVAILABLE = True
+
+config = _picam.config
 
 try:
     #add disable_camera_led=1 to config.txt to have control over the LED
@@ -19,10 +21,12 @@ except:
 def LEDOn():
     if GPIO_AVAILABLE:
         GPIO.output(5,True)
+        
 def LEDOff():
     if GPIO_AVAILABLE:
         GPIO.output(5,False)
-        
+
+       
 def difference(list1,list2, tolerance):
     return _picam.difference(list1,list2, tolerance)
    
