@@ -15,6 +15,7 @@ Returns a PIL Image object
     import time
     
     i = picam.takePhoto()
+    i.save('/tmp/test.jpg')
     
     ii = picam.takePhotoWithDetails(640,480, 85)
     
