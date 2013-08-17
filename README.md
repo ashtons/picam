@@ -17,10 +17,10 @@ Returns a PIL Image object
     i = picam.takePhoto()
     i.save('/tmp/test.jpg')
     
-    ii = picam.takePhotoWithDetails(640,480, 85)
+    ii = picam.takePhotoWithDetails(640,480, 85) # (width, height, jpg quality)
     
     filename = "/tmp/picam-%s.h264" % time.strftime("%Y%m%d-%H%M%S")
-    picam.recordVideoWithDetails(filename,640,480,5000)
+    picam.recordVideoWithDetails(filename,640,480,5000) # (Wdith, height, duration = 5s)
     
     picam.LEDOn()
     picam.LEDOff()
