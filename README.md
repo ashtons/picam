@@ -35,10 +35,11 @@ Returns a PIL Image object
 
 Installation
 ------------
-Download the package folder and run the setup command to install the script
+Download the  folder and run the setup command to install the script
 
     python setup.py install
 
+    pip install https://github.com/ashtons/picam/zipball/master#egg=picam
 
 Constants
 ------------
