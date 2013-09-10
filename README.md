@@ -25,6 +25,13 @@ Returns a PIL Image object
     # (width, height, duration = 5s)
     picam.recordVideoWithDetails(filename,640,480,5000) 
     
+    #RGB pixel info
+    frame1 = picam.takeRGBPhotoWithDetails(width,height)
+    frame2 = picam.takeRGBPhotoWithDetails(width,height)
+    
+    #returns RGB pixel list with modified pixels, and the quantity of changed pixels
+    (modified,q) = picam.difference(frame1,frame2,THRESHOLD)
+    
     picam.LEDOn()
     picam.LEDOff()
     
