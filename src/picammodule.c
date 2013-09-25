@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "picam.h"
+#include "encode.h"
 #include "interface/mmal/mmal.h"
 
 #define CLAMP(x, low, high)  (((x) > (high)) ? (high) : (((x) < (low)) ? (low) : (x)))
@@ -16,6 +17,7 @@ typedef struct {
     int meterMode;
     int imageFX;
     int awbMode;
+    int ISO;
 } _PicamConfig;
 
 static void PicamConfig_dealloc(_PicamConfig* self) {    
@@ -31,10 +33,11 @@ static PyObject *Picam_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
 
     self = (_PicamConfig *)type->tp_alloc(type, 0);
     if (self != NULL) {
-        self->exposure = MMAL_PARAM_EXPOSUREMODE_OFF;       
+        self->exposure = MMAL_PARAM_EXPOSUREMODE_AUTO;       
         self->meterMode = MMAL_PARAM_EXPOSUREMETERINGMODE_AVERAGE;       
         self->imageFX = MMAL_PARAM_IMAGEFX_NONE;    
-        self->awbMode = MMAL_PARAM_AWBMODE_OFF;       
+        self->awbMode = MMAL_PARAM_AWBMODE_AUTO;       
+        self->ISO = 400;
     }
     return (PyObject *)self;
 }
@@ -43,6 +46,7 @@ static PyMemberDef PicamConfig_members[] = {
     {"meterMode",T_INT, offsetof(_PicamConfig, meterMode), 0, "meterMode"},
     {"imageFX",  T_INT, offsetof(_PicamConfig, imageFX), 0, "imageFX"},
     {"awbMode",  T_INT, offsetof(_PicamConfig, awbMode), 0, "awbMode"},   
+    {"ISO",  T_INT, offsetof(_PicamConfig, ISO), 0, "ISO"},       
     {NULL}  /* Sentinel */
 };
 static PyTypeObject PicamConfigType = {
@@ -94,7 +98,8 @@ static _PicamConfig* picam_newconfig()
         o->exposure = MMAL_PARAM_EXPOSUREMODE_AUTO;       
         o->meterMode = MMAL_PARAM_EXPOSUREMETERINGMODE_AVERAGE;       
         o->imageFX = MMAL_PARAM_IMAGEFX_NONE;    
-        o->awbMode = MMAL_PARAM_AWBMODE_OFF;   
+        o->awbMode = MMAL_PARAM_AWBMODE_AUTO; 
+        o->ISO = 400;  
     }    
     return o;
 }
@@ -112,8 +117,8 @@ static PyObject * picam_listtest(PyObject *self, PyObject *args) {
 static PyObject * picam_takephoto(PyObject *self, PyObject *args) {
     PyObject *result = Py_None;                           
     long bufsize = 0l;    
-    //printf("%d %d %d %d\n",picamConfig->exposure, picamConfig->meterMode, picamConfig->imageFX, picamConfig->awbMode); 
-    char *buffer = (char *)takePhoto(picamConfig->exposure, picamConfig->meterMode, picamConfig->imageFX, picamConfig->awbMode, &bufsize);        
+    //printf("%d %d %d %d %d\n",picamConfig->exposure, picamConfig->meterMode, picamConfig->imageFX, picamConfig->awbMode, picamConfig->ISO); 
+    char *buffer = (char *)takePhoto(picamConfig->exposure, picamConfig->meterMode, picamConfig->imageFX, picamConfig->awbMode, picamConfig->ISO, &bufsize);        
     result = Py_BuildValue("s#", buffer, bufsize);
     free(buffer);      
     return result;
@@ -187,7 +192,7 @@ static PyObject *picam_takergbphotowithdetails(PyObject *self, PyObject *args) {
     }
     long bufsize = 0l;
     
-    char *buffer = (char *)takeRGBPhotoWithDetails(width, height,picamConfig->exposure, picamConfig->meterMode, picamConfig->imageFX, picamConfig->awbMode, &bufsize); 
+    char *buffer = (char *)takeRGBPhotoWithDetails(width, height,picamConfig->exposure, picamConfig->meterMode, picamConfig->imageFX, picamConfig->awbMode, picamConfig->ISO, &bufsize); 
      
     long bufMinusHeader = bufsize-54;    
     long listSize = bufMinusHeader / 3;   
@@ -213,7 +218,7 @@ static PyObject * picam_takephotowithdetails(PyObject *self, PyObject *args) {
        return NULL;
     }
     long bufsize = 0l;
-    char *buffer = (char *)takePhotoWithDetails(width, height, quality, picamConfig->exposure, picamConfig->meterMode, picamConfig->imageFX, picamConfig->awbMode, &bufsize);   
+    char *buffer = (char *)takePhotoWithDetails(width, height, quality, picamConfig->exposure, picamConfig->meterMode, picamConfig->imageFX, picamConfig->awbMode, picamConfig->ISO, &bufsize);   
     result = Py_BuildValue("s#", buffer, bufsize);
     free(buffer);      
     return result;
@@ -304,11 +309,10 @@ void setupImageFXConstants(PyObject *module_dict) {
 PyMODINIT_FUNC
 init_picam(void)
 {
-    PyObject *module, *module_dict;  
-    
+    PyObject *module;      
     if (PyType_Ready(&PicamConfigType) < 0)
         return;
-    module = Py_InitModule("_picam", PiCamMethods);       
+    module = Py_InitModule("_picam", PiCamMethods);         
     setupExposureConstants(module);    
     setupAWBConstants(module);
     setupMeteringConstants(module);

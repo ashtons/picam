@@ -39,7 +39,9 @@ Returns a PIL Image object
     picam.config.exposure = picam.MMAL_PARAM_EXPOSUREMODE_AUTO
     picam.config.meterMode = picam.MMAL_PARAM_EXPOSUREMETERINGMODE_AVERAGE
     picam.config.awbMode = picam.MMAL_PARAM_AWBMODE_SHADE
-
+    picam.config.ISO = 400
+    picam.config.ISO = 800
+    
 Installation
 ------------
 Download the  folder and run the setup command to install the script

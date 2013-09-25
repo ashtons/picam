@@ -27,6 +27,7 @@
 
 /// Camera number to use - we only have one camera, indexed from 0.
 #define CAMERA_NUMBER 0
+#define MMAL_CAMERA_PREVIEW_PORT 0
 #define MMAL_CAMERA_VIDEO_PORT 1
 #define MMAL_CAMERA_CAPTURE_PORT 2
 
@@ -47,6 +48,8 @@ const int MAX_BITRATE = 30000000; // 30Mbits/s
 const int ABORT_INTERVAL = 100; // ms
 
 int mmal_status_to_int(MMAL_STATUS_T status);
+
+
 /** Structure containing all state information for the current run
  */
 typedef struct
@@ -68,8 +71,10 @@ typedef struct
    /* End Video */
    MMAL_FOURCC_T encoding;             /// Encoding to use for the output file.   
   
+   
    RASPICAM_CAMERA_PARAMETERS camera_parameters; /// Camera setup parameters
 
+   MMAL_COMPONENT_T *preview_component;    
    MMAL_COMPONENT_T *camera_component;    /// Pointer to the camera component
    MMAL_COMPONENT_T *encoder_component;   /// Pointer to the encoder component
    MMAL_COMPONENT_T *null_sink_component; /// Pointer to the null sink component
@@ -122,7 +127,7 @@ static void default_status(RASPISTILL_STATE *state)
    state->encoder_connection = NULL;
    state->encoder_pool = NULL;
    state->encoding = MMAL_ENCODING_JPEG; //MMAL_ENCODING_BMP  
-   raspicamcontrol_set_defaults(&state->camera_parameters);
+   raspicamcontrol_set_defaults(&state->camera_parameters);  
 }
 
 
@@ -656,31 +661,33 @@ static void check_disable_port(MMAL_PORT_T *port)
 }
 
 
-uint8_t *takePhoto(int exposure, int meterMode, int imageFX, int awbMode, long *sizeread) {    
+uint8_t *takePhoto(int exposure, int meterMode, int imageFX, int awbMode,int ISO, long *sizeread) {    
     long test = 0l;    
-    uint8_t *tmp = internelPhotoWithDetails(2592,1944,85, MMAL_ENCODING_JPEG, exposure, meterMode, imageFX, awbMode, &test);        
+    uint8_t *tmp = internelPhotoWithDetails(2592,1944,85, MMAL_ENCODING_JPEG, exposure, meterMode, imageFX, awbMode, ISO, &test);        
     *sizeread = test;   
     return tmp;
 }
 
-uint8_t *takePhotoWithDetails(int width, int height, int quality, int exposure, int meterMode, int imageFX, int awbMode, long *sizeread) {
+uint8_t *takePhotoWithDetails(int width, int height, int quality, int exposure, int meterMode, int imageFX, int awbMode,int ISO, long *sizeread) {
     long test = 0l;    
-    uint8_t *tmp = internelPhotoWithDetails(width,height,quality,MMAL_ENCODING_JPEG,exposure,meterMode,imageFX, awbMode, &test);        
+    uint8_t *tmp = internelPhotoWithDetails(width,height,quality,MMAL_ENCODING_JPEG,exposure,meterMode,imageFX, awbMode, ISO, &test);        
     *sizeread = test;   
     return tmp;
 }
 
-uint8_t *takeRGBPhotoWithDetails(int width, int height, int exposure, int meterMode, int imageFX, int awbMode, long *sizeread) {
+uint8_t *takeRGBPhotoWithDetails(int width, int height, int exposure, int meterMode, int imageFX, int awbMode, int ISO, long *sizeread) {
     long test = 0l;    
-    uint8_t *tmp = internelPhotoWithDetails(width,height,100,MMAL_ENCODING_BMP, exposure, meterMode, imageFX, awbMode, &test);            
+    uint8_t *tmp = internelPhotoWithDetails(width,height,100, MMAL_ENCODING_BMP, exposure, meterMode, imageFX, awbMode, ISO, &test);            
     *sizeread = test;   
     return tmp;
 }
 
-uint8_t *internelPhotoWithDetails(int width, int height, int quality,MMAL_FOURCC_T encoding, int exposure, int meterMode, int imageFX, int awbMode, long *sizeread) {
+uint8_t *internelPhotoWithDetails(int width, int height, int quality,MMAL_FOURCC_T encoding, int exposure, int meterMode, int imageFX, int awbMode,int ISO, long *sizeread) {
    RASPISTILL_STATE state;   
    MMAL_STATUS_T status = MMAL_SUCCESS;   
    
+   MMAL_PORT_T *preview_input_port = NULL;
+   MMAL_PORT_T *camera_preview_port = NULL;
    MMAL_PORT_T *camera_still_port = NULL;
    MMAL_PORT_T *encoder_input_port = NULL;
    MMAL_PORT_T *encoder_output_port = NULL;  
@@ -710,17 +717,29 @@ uint8_t *internelPhotoWithDetails(int width, int height, int quality,MMAL_FOURCC
    state.camera_parameters.exposureMeterMode = meterMode;
    state.camera_parameters.awbMode = awbMode;
    state.camera_parameters.imageEffect = imageFX;   
+   state.camera_parameters.ISO = ISO;
+      
+   MMAL_COMPONENT_T *preview = 0;
+   
    if ((status = create_video_camera_component(&state)) != MMAL_SUCCESS) {       
       vcos_log_error("%s: Failed to create camera component", __func__);
+   } else if ((status = mmal_component_create("vc.null_sink", &preview)) != MMAL_SUCCESS)  {
+      vcos_log_error("%s: Failed to create preview component", __func__);
+      destroy_camera_component(&state);   
    } else if ((status = create_encoder_component(&state)) != MMAL_SUCCESS) {     
       vcos_log_error("%s: Failed to create encode component", __func__);      
       destroy_camera_component(&state);
    } else {       
+      status = mmal_component_enable(preview);
+      state.preview_component = preview;            
       PORT_USERDATA callback_data;    
+      camera_preview_port = state.camera_component->output[MMAL_CAMERA_PREVIEW_PORT];
       camera_still_port   = state.camera_component->output[MMAL_CAMERA_CAPTURE_PORT];
       encoder_input_port  = state.encoder_component->input[0];
       encoder_output_port = state.encoder_component->output[0];
-
+      preview_input_port  = state.preview_component->input[0];
+      
+      status = connect_ports(camera_preview_port, preview_input_port, &state.preview_connection);
     
       VCOS_STATUS_T vcos_status;
          
@@ -745,7 +764,6 @@ uint8_t *internelPhotoWithDetails(int width, int height, int quality,MMAL_FOURCC
       }
 
        
-
       
        
       int num, q;                                                
@@ -795,10 +813,15 @@ error:
     if (state.encoder_component)
         mmal_component_disable(state.encoder_component);
      
-
+    if (state.preview_component) {
+         mmal_component_disable(state.preview_component);        
+         mmal_component_destroy(state.preview_component);
+         state.preview_component = NULL;    
+    }
     if (state.camera_component)
         mmal_component_disable(state.camera_component);
-
+    
+    
     destroy_encoder_component(&state);     
     destroy_camera_component(&state);
      
