@@ -42,15 +42,15 @@ Returns a PIL Image object
     picam.config.ISO = 400
     picam.config.ISO = 800
     
-    picam.sharpness = 0               # -100 to 100
-    picam.contrast = 0                # -100 to 100
-    picam.brightness = 50             #  0 to 100
-    picam.saturation = 0              #  -100 to 100
-    picam.videoStabilisation = 0      # 0 or 1 (false or true)
-    picam.exposureCompensation  = 0   # -10 to +10 ?
-    picam.rotation = 90               # 0-359
-    picam.hflip = 1                   # 0 or 1
-    picam.vflip = 0                   # 0 or 1
+    picam.config.sharpness = 0               # -100 to 100
+    picam.config.contrast = 0                # -100 to 100
+    picam.config.brightness = 50             #  0 to 100
+    picam.config.saturation = 0              #  -100 to 100
+    picam.config.videoStabilisation = 0      # 0 or 1 (false or true)
+    picam.config.exposureCompensation  = 0   # -10 to +10 ?
+    picam.config.rotation = 90               # 0-359
+    picam.config.hflip = 1                   # 0 or 1
+    picam.config.vflip = 0                   # 0 or 1
     
     
 Installation
