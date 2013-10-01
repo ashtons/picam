@@ -127,7 +127,9 @@ static void default_status(RASPISTILL_STATE *state)
    state->encoder_connection = NULL;
    state->encoder_pool = NULL;
    state->encoding = MMAL_ENCODING_JPEG; //MMAL_ENCODING_BMP  
-   raspicamcontrol_set_defaults(&state->camera_parameters);  
+   raspicamcontrol_set_defaults(&state->camera_parameters);
+   //state->camera_parameters.exposureMode = MMAL_PARAM_EXPOSUREMODE_NIGHT;
+   //state->camera_parameters.exposureMeterMode = MMAL_PARAM_EXPOSUREMETERINGMODE_AVERAGE;
 }
 
 
@@ -660,29 +662,28 @@ static void check_disable_port(MMAL_PORT_T *port)
       mmal_port_disable(port);
 }
 
-
-uint8_t *takePhoto(int exposure, int meterMode, int imageFX, int awbMode,int ISO, long *sizeread) {    
+uint8_t *takePhoto(PicamParams *parms, long *sizeread) { 
     long test = 0l;    
-    uint8_t *tmp = internelPhotoWithDetails(2592,1944,85, MMAL_ENCODING_JPEG, exposure, meterMode, imageFX, awbMode, ISO, &test);        
+    uint8_t *tmp = internelPhotoWithDetails(2592,1944,85, MMAL_ENCODING_JPEG, parms, &test);        
     *sizeread = test;   
     return tmp;
 }
 
-uint8_t *takePhotoWithDetails(int width, int height, int quality, int exposure, int meterMode, int imageFX, int awbMode,int ISO, long *sizeread) {
+uint8_t *takePhotoWithDetails(int width, int height, int quality, PicamParams *parms, long *sizeread) {
     long test = 0l;    
-    uint8_t *tmp = internelPhotoWithDetails(width,height,quality,MMAL_ENCODING_JPEG,exposure,meterMode,imageFX, awbMode, ISO, &test);        
+    uint8_t *tmp = internelPhotoWithDetails(width,height,quality,MMAL_ENCODING_JPEG,parms, &test);        
     *sizeread = test;   
     return tmp;
 }
 
-uint8_t *takeRGBPhotoWithDetails(int width, int height, int exposure, int meterMode, int imageFX, int awbMode, int ISO, long *sizeread) {
+uint8_t *takeRGBPhotoWithDetails(int width, int height, PicamParams *parms, long *sizeread) {
     long test = 0l;    
-    uint8_t *tmp = internelPhotoWithDetails(width,height,100, MMAL_ENCODING_BMP, exposure, meterMode, imageFX, awbMode, ISO, &test);            
+    uint8_t *tmp = internelPhotoWithDetails(width,height,100, MMAL_ENCODING_BMP, parms, &test);            
     *sizeread = test;   
     return tmp;
 }
 
-uint8_t *internelPhotoWithDetails(int width, int height, int quality,MMAL_FOURCC_T encoding, int exposure, int meterMode, int imageFX, int awbMode,int ISO, long *sizeread) {
+uint8_t *internelPhotoWithDetails(int width, int height, int quality,MMAL_FOURCC_T encoding, PicamParams *parms, long *sizeread) {
    RASPISTILL_STATE state;   
    MMAL_STATUS_T status = MMAL_SUCCESS;   
    
@@ -713,11 +714,20 @@ uint8_t *internelPhotoWithDetails(int width, int height, int quality,MMAL_FOURCC
    state.quality = quality;
    state.encoding = encoding;
    state.videoEncode = 0;
-   state.camera_parameters.exposureMode = exposure;
-   state.camera_parameters.exposureMeterMode = meterMode;
-   state.camera_parameters.awbMode = awbMode;
-   state.camera_parameters.imageEffect = imageFX;   
-   state.camera_parameters.ISO = ISO;
+   state.camera_parameters.exposureMode = parms->exposure;
+   state.camera_parameters.exposureMeterMode = parms->meterMode;
+   state.camera_parameters.awbMode = parms->awbMode;
+   state.camera_parameters.imageEffect = parms->imageFX;   
+   state.camera_parameters.ISO = parms->ISO;
+   state.camera_parameters.sharpness = parms->sharpness;           
+   state.camera_parameters.contrast = parms->contrast;              
+   state.camera_parameters.brightness= parms->brightness;          
+   state.camera_parameters.saturation = parms->saturation;           
+   state.camera_parameters.videoStabilisation = parms->videoStabilisation;    /// 0 or 1 (false or true)
+   state.camera_parameters.exposureCompensation = parms->exposureCompensation; 
+   state.camera_parameters.rotation = parms->rotation;
+   state.camera_parameters.hflip = parms->hflip;
+   state.camera_parameters.vflip = parms->vflip;
       
    MMAL_COMPONENT_T *preview = 0;
    
@@ -762,9 +772,7 @@ uint8_t *internelPhotoWithDetails(int width, int height, int quality,MMAL_FOURCC
           vcos_log_error("Failed to setup encoder output");
           goto error;
       }
-
-       
-      
+            
        
       int num, q;                                                
       // Enable the encoder output port

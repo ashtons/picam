@@ -42,6 +42,17 @@ Returns a PIL Image object
     picam.config.ISO = 400
     picam.config.ISO = 800
     
+    picam.sharpness = 0               # -100 to 100
+    picam.contrast = 0                # -100 to 100
+    picam.brightness = 50             #  0 to 100
+    picam.saturation = 0              #  -100 to 100
+    picam.videoStabilisation = 0      # 0 or 1 (false or true)
+    picam.exposureCompensation  = 0   # -10 to +10 ?
+    picam.rotation = 90               # 0-359
+    picam.hflip = 1                   # 0 or 1
+    picam.vflip = 0                   # 0 or 1
+    
+    
 Installation
 ------------
 Download the  folder and run the setup command to install the script
