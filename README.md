@@ -32,6 +32,7 @@ Returns a PIL Image object
     #returns RGB pixel list with modified pixels, and the quantity of changed pixels
     (modified,q) = picam.difference(frame1,frame2,THRESHOLD)
     
+    #add disable_camera_led=1 to config.txt to have control over the LED
     picam.LEDOn()
     picam.LEDOff()
     
