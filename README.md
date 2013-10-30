@@ -64,6 +64,19 @@ Download the  folder and run the setup command to install the script
 
     pip install https://github.com/ashtons/picam/zipball/master#egg=picam
 
+
+Make sure the decessary dependencies are installed and the latest versions
+
+    sudo apt-get update
+    
+    sudo apt-get upgrade
+    
+    sudo raspi-config  #to enable the camera
+    
+    raspistill -o /tmp/test.jpg
+    
+    
+
 Constants
 ------------
     MMAL_PARAM_EXPOSUREMODE_OFF
