@@ -27,6 +27,7 @@ typedef struct {
     int rotation;              /// 0-359
     int hflip;                 /// 0 or 1
     int vflip;                 /// 0 or 1
+    int shutter_speed;         /// 0 = auto, otherwise the shutter speed in ms
 } _PicamConfig;
 
 static void PicamConfig_dealloc(_PicamConfig* self) {    
@@ -46,7 +47,7 @@ static PyObject *Picam_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
         self->meterMode = MMAL_PARAM_EXPOSUREMETERINGMODE_AVERAGE;       
         self->imageFX = MMAL_PARAM_IMAGEFX_NONE;    
         self->awbMode = MMAL_PARAM_AWBMODE_AUTO;       
-        self->ISO = 400;
+        self->ISO = 0;
         self->sharpness = 0;           
         self->contrast = 0;              
         self->brightness= 50;          
@@ -56,6 +57,7 @@ static PyObject *Picam_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
         self->rotation = 0;
         self->hflip = 0;
         self->vflip = 0;
+        self->shutter_speed = 0;
     }
     return (PyObject *)self;
 }
@@ -74,6 +76,8 @@ static PyMemberDef PicamConfig_members[] = {
     {"rotation",  T_INT, offsetof(_PicamConfig, rotation), 0, "rotation"},     
     {"hflip",  T_INT, offsetof(_PicamConfig, hflip), 0, "hflip"},     
     {"vflip",  T_INT, offsetof(_PicamConfig, vflip), 0, "vflip"},     
+    {"shutterSpeed",  T_INT, offsetof(_PicamConfig, shutter_speed), 0, "0 = auto, otherwise the shutter speed in ms"},     
+    
     {NULL}  /* Sentinel */
 };
 static PyTypeObject PicamConfigType = {
@@ -126,7 +130,7 @@ static _PicamConfig* picam_newconfig()
         o->meterMode = MMAL_PARAM_EXPOSUREMETERINGMODE_AVERAGE;       
         o->imageFX = MMAL_PARAM_IMAGEFX_NONE;    
         o->awbMode = MMAL_PARAM_AWBMODE_AUTO; 
-        o->ISO = 400;  
+        o->ISO = 0;  
         o->sharpness = 0;           
         o->contrast = 0;              
         o->brightness= 50;          
@@ -136,6 +140,7 @@ static _PicamConfig* picam_newconfig()
         o->rotation = 0;
         o->hflip = 0;
         o->vflip = 0;
+        o->shutter_speed = 0;
     }    
     return o;
 }
@@ -165,6 +170,7 @@ static void fillParms(PicamParams *parms) {
     parms->rotation = picamConfig->rotation;
     parms->hflip =  picamConfig->hflip;
     parms->vflip = picamConfig->vflip;     
+    parms->shutter_speed = picamConfig->shutter_speed;
 }
 
 static PyObject * picam_takephoto(PyObject *self, PyObject *args) {

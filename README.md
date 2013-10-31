@@ -40,6 +40,7 @@ Returns a PIL Image object
     picam.config.exposure = picam.MMAL_PARAM_EXPOSUREMODE_AUTO
     picam.config.meterMode = picam.MMAL_PARAM_EXPOSUREMETERINGMODE_AVERAGE
     picam.config.awbMode = picam.MMAL_PARAM_AWBMODE_SHADE
+    picam.config.ISO = 0 #auto
     picam.config.ISO = 400
     picam.config.ISO = 800
     
@@ -52,7 +53,7 @@ Returns a PIL Image object
     picam.config.rotation = 90               # 0-359
     picam.config.hflip = 1                   # 0 or 1
     picam.config.vflip = 0                   # 0 or 1
-    
+    picam.config.shutterSpeed = 20000         # 0 = auto, otherwise the shutter speed in ms
     
 Installation
 ------------
@@ -65,7 +66,7 @@ Download the  folder and run the setup command to install the script
     pip install https://github.com/ashtons/picam/zipball/master#egg=picam
 
 
-Upgrade Firmare
+Upgrade Firmware
 ----------------
 Update the firmware (some functions are only available in the newer firmware versions)
     

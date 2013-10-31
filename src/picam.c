@@ -42,7 +42,7 @@
 #define VIDEO_FRAME_RATE_DEN 1
 
 // Max bitrate we allow for recording
-const int MAX_BITRATE = 30000000; // 30Mbits/s
+const int MAX_BITRATE = 25000000; // 25Mbits/s
 
 /// Interval at which we check for an failure abort during capture
 const int ABORT_INTERVAL = 100; // ms
@@ -728,7 +728,8 @@ uint8_t *internelPhotoWithDetails(int width, int height, int quality,MMAL_FOURCC
    state.camera_parameters.rotation = parms->rotation;
    state.camera_parameters.hflip = parms->hflip;
    state.camera_parameters.vflip = parms->vflip;
-      
+   state.camera_parameters.shutter_speed = parms->shutter_speed;  
+   
    MMAL_COMPONENT_T *preview = 0;
    
    if ((status = create_video_camera_component(&state)) != MMAL_SUCCESS) {       

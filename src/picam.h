@@ -18,6 +18,7 @@ typedef struct {
     int rotation;
     int hflip;                 /// 0 or 1
     int vflip;                 /// 0 or 1
+    int shutter_speed;          //0 for auto, otherwise the shutter speed in ms
 } PicamParams;
 
 uint8_t *takePhoto(PicamParams *parms, long *sizeread);
