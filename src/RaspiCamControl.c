@@ -394,8 +394,7 @@ int raspicamcontrol_set_all_parameters(MMAL_COMPONENT_T *camera, const RASPICAM_
    result += raspicamcontrol_set_rotation(camera, params->rotation);
    result += raspicamcontrol_set_flips(camera, params->hflip, params->vflip);   
    result += raspicamcontrol_set_ROI(camera, params->roi);
-   result += raspicamcontrol_set_shutter_speed(camera, params->shutter_speed);
-   printf("Shutter speed %d", params->shutter_speed);
+   result += raspicamcontrol_set_shutter_speed(camera, params->shutter_speed);   
    return result;
 }
 
