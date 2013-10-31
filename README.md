@@ -74,7 +74,7 @@ Update the firmware (some functions are only available in the newer firmware ver
     sudo rpi-update
     
     
-Make sure the decessary dependencies are installed and the latest versions
+Make sure the necessary dependencies are installed and the latest versions
 
     sudo apt-get update
     
