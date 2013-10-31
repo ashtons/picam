@@ -19,11 +19,14 @@ typedef struct {
     int hflip;                 /// 0 or 1
     int vflip;                 /// 0 or 1
     int shutter_speed;          //0 for auto, otherwise the shutter speed in ms
+    int videoProfile;
+    int videoBitrate;           //17000000
+    int videoFramerate;         //30
 } PicamParams;
 
 uint8_t *takePhoto(PicamParams *parms, long *sizeread);
 uint8_t *takePhotoWithDetails(int width, int height, int quality, PicamParams *parms, long *sizeread);
 uint8_t *takeRGBPhotoWithDetails(int width, int height, PicamParams *parms,long *sizeread); 
 uint8_t *internelPhotoWithDetails(int width, int height, int quality,MMAL_FOURCC_T encoding,PicamParams *parms, long *sizeread); 
-void internelVideoWithDetails(char *filename, int width, int height, int duration); 
+void internelVideoWithDetails(char *filename, int width, int height, int duration, PicamParams *parms); 
 #endif // _PICAM_H

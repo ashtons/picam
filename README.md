@@ -55,6 +55,11 @@ Returns a PIL Image object
     picam.config.vflip = 0                   # 0 or 1
     picam.config.shutterSpeed = 20000         # 0 = auto, otherwise the shutter speed in ms
     
+    picam.config.videoProfile = picam.MMAL_VIDEO_PROFILE_H264_HIGH
+    picam.config.videoFramerate = 15
+    picam.config.videoBitrate = 17000000
+    
+    
 Installation
 ------------
 Download the  folder and run the setup command to install the script
@@ -147,3 +152,8 @@ Constants
     MMAL_PARAM_IMAGEFX_COLOURPOINT
     MMAL_PARAM_IMAGEFX_COLOURBALANCE
     MMAL_PARAM_IMAGEFX_CARTOON  
+    
+    MMAL_VIDEO_PROFILE_H264_BASELINE
+    MMAL_VIDEO_PROFILE_H264_MAIN
+    MMAL_VIDEO_PROFILE_H264_HIGH
+    

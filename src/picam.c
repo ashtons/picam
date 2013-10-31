@@ -65,6 +65,7 @@ typedef struct
    int bitrate;                        /// Requested bitrate
    int framerate;                      /// Requested frame rate (fps)
    int intraperiod;                    /// Intra-refresh period (key frame rate)
+   int profile;                        /// H264 profile to use for encoding
    char *filename;                     /// filename of output file
    int immutableInput; 
    
@@ -116,12 +117,12 @@ static void default_status(RASPISTILL_STATE *state)
    state->bytesStored = 0l;
    /*Video*/
                     
-   //state->bitrate = 17000000;
-   state->bitrate = 5000000;
+   state->bitrate = 17000000;
    state->framerate = VIDEO_FRAME_RATE_NUM;
    state->immutableInput = 0;
    state->intraperiod = 0;    // Not set
-    
+   state->profile = MMAL_VIDEO_PROFILE_H264_HIGH;
+
    state->camera_component = NULL;
    state->encoder_component = NULL;   
    state->encoder_connection = NULL;
@@ -523,8 +524,7 @@ static MMAL_STATUS_T create_video_encoder_component(RASPISTILL_STATE *state)
 
    encoder_output->format->encoding = MMAL_ENCODING_H264;
    
-   encoder_output->format->bitrate = state->bitrate;
-
+   encoder_output->format->bitrate = state->bitrate;   
    encoder_output->buffer_size = encoder_output->buffer_size_recommended;
 
    if (encoder_output->buffer_size < encoder_output->buffer_size_min)
@@ -569,7 +569,20 @@ static MMAL_STATUS_T create_video_encoder_component(RASPISTILL_STATE *state)
       }
 
    }
+   {
+      MMAL_PARAMETER_VIDEO_PROFILE_T  param;
+      param.hdr.id = MMAL_PARAMETER_PROFILE;
+      param.hdr.size = sizeof(param);
 
+      param.profile[0].profile = state->profile;
+      param.profile[0].level = MMAL_VIDEO_LEVEL_H264_4; // This is the only value supported      
+      status = mmal_port_parameter_set(encoder_output, &param.hdr);
+      if (status != MMAL_SUCCESS)
+      {
+         vcos_log_error("Unable to set H264 profile");
+         goto error;
+      }
+   }
    if (mmal_port_parameter_set_boolean(encoder_input, MMAL_PARAMETER_VIDEO_IMMUTABLE_INPUT, state->immutableInput) != MMAL_SUCCESS)
    {
       vcos_log_error("Unable to set immutable input flag");
@@ -714,6 +727,10 @@ uint8_t *internelPhotoWithDetails(int width, int height, int quality,MMAL_FOURCC
    state.quality = quality;
    state.encoding = encoding;
    state.videoEncode = 0;
+   state.bitrate = parms->videoBitrate;
+   state.framerate = parms->videoFramerate;
+   state.profile = parms->videoProfile;
+   
    state.camera_parameters.exposureMode = parms->exposure;
    state.camera_parameters.exposureMeterMode = parms->meterMode;
    state.camera_parameters.awbMode = parms->awbMode;
@@ -841,7 +858,7 @@ error:
     return state.filedata;
 }
 
-void internelVideoWithDetails(char *filename, int width, int height, int duration) {
+void internelVideoWithDetails(char *filename, int width, int height, int duration, PicamParams *parms) {
    RASPISTILL_STATE state;   
    MMAL_STATUS_T status = MMAL_SUCCESS;   
    
@@ -870,6 +887,27 @@ void internelVideoWithDetails(char *filename, int width, int height, int duratio
    state.quality = 0;
    state.videoEncode = 1;
    state.filename = filename;
+   
+   state.bitrate = parms->videoBitrate;
+   state.framerate = parms->videoFramerate;
+   state.profile = parms->videoProfile;
+   
+   state.camera_parameters.exposureMode = parms->exposure;
+   state.camera_parameters.exposureMeterMode = parms->meterMode;
+   state.camera_parameters.awbMode = parms->awbMode;
+   state.camera_parameters.imageEffect = parms->imageFX;   
+   state.camera_parameters.ISO = parms->ISO;
+   state.camera_parameters.sharpness = parms->sharpness;           
+   state.camera_parameters.contrast = parms->contrast;              
+   state.camera_parameters.brightness= parms->brightness;          
+   state.camera_parameters.saturation = parms->saturation;           
+   state.camera_parameters.videoStabilisation = parms->videoStabilisation;    /// 0 or 1 (false or true)
+   state.camera_parameters.exposureCompensation = parms->exposureCompensation; 
+   state.camera_parameters.rotation = parms->rotation;
+   state.camera_parameters.hflip = parms->hflip;
+   state.camera_parameters.vflip = parms->vflip;
+   state.camera_parameters.shutter_speed = parms->shutter_speed;  
+   
    if ((status = create_video_camera_component(&state)) != MMAL_SUCCESS) {       
       vcos_log_error("%s: Failed to create camera component", __func__);
    } else if ((status = create_video_encoder_component(&state)) != MMAL_SUCCESS) {     

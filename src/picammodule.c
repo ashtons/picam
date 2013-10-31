@@ -28,6 +28,9 @@ typedef struct {
     int hflip;                 /// 0 or 1
     int vflip;                 /// 0 or 1
     int shutter_speed;         /// 0 = auto, otherwise the shutter speed in ms
+    int videoProfile;       //  MMAL_VIDEO_PROFILE_H264_HIGH
+    int videoBitrate;
+    int videoFramerate;     //30
 } _PicamConfig;
 
 static void PicamConfig_dealloc(_PicamConfig* self) {    
@@ -58,6 +61,9 @@ static PyObject *Picam_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
         self->hflip = 0;
         self->vflip = 0;
         self->shutter_speed = 0;
+        self->videoProfile = MMAL_VIDEO_PROFILE_H264_HIGH;
+        self->videoBitrate = 17000000;
+        self->videoFramerate = 30;
     }
     return (PyObject *)self;
 }
@@ -77,7 +83,9 @@ static PyMemberDef PicamConfig_members[] = {
     {"hflip",  T_INT, offsetof(_PicamConfig, hflip), 0, "hflip"},     
     {"vflip",  T_INT, offsetof(_PicamConfig, vflip), 0, "vflip"},     
     {"shutterSpeed",  T_INT, offsetof(_PicamConfig, shutter_speed), 0, "0 = auto, otherwise the shutter speed in ms"},     
-    
+    {"videoProfile",  T_INT, offsetof(_PicamConfig, videoProfile), 0, "videoProfile"},  
+    {"videoBitrate",  T_INT, offsetof(_PicamConfig, videoBitrate), 0, "videoBitrate"},  
+    {"videoFramerate",  T_INT, offsetof(_PicamConfig, videoFramerate), 0, "videoFramerate"},  
     {NULL}  /* Sentinel */
 };
 static PyTypeObject PicamConfigType = {
@@ -141,6 +149,9 @@ static _PicamConfig* picam_newconfig()
         o->hflip = 0;
         o->vflip = 0;
         o->shutter_speed = 0;
+        o->videoProfile = MMAL_VIDEO_PROFILE_H264_HIGH;
+        o->videoBitrate = 17000000;
+        o->videoFramerate = 30;
     }    
     return o;
 }
@@ -171,6 +182,9 @@ static void fillParms(PicamParams *parms) {
     parms->hflip =  picamConfig->hflip;
     parms->vflip = picamConfig->vflip;     
     parms->shutter_speed = picamConfig->shutter_speed;
+    parms->videoProfile = picamConfig->videoProfile;
+    parms->videoBitrate = picamConfig->videoBitrate;
+    parms->videoFramerate = picamConfig->videoFramerate;
 }
 
 static PyObject * picam_takephoto(PyObject *self, PyObject *args) {
@@ -294,10 +308,12 @@ static PyObject * picam_recordvideowithdetails(PyObject *self, PyObject *args) {
     int height;
     int duration;
     char *filename;
+    PicamParams parms;
+    fillParms(&parms);
     if (!PyArg_ParseTuple(args,"siii",&filename, &width,&height,&duration)) {
        return NULL;
     }
-    internelVideoWithDetails(filename, width, height, duration);  
+    internelVideoWithDetails(filename, width, height, duration,&parms);  
     Py_INCREF(result);
     return result;
 }
@@ -368,7 +384,11 @@ void setupImageFXConstants(PyObject *module_dict) {
     DICT_SET(module_dict,MMAL_PARAM_IMAGEFX_COLOURBALANCE);
     DICT_SET(module_dict,MMAL_PARAM_IMAGEFX_CARTOON);  
 }
-
+void setupVideoProfileConstants(PyObject *module_dict) {   
+    DICT_SET(module_dict,MMAL_VIDEO_PROFILE_H264_BASELINE);
+    DICT_SET(module_dict,MMAL_VIDEO_PROFILE_H264_MAIN);
+    DICT_SET(module_dict,MMAL_VIDEO_PROFILE_H264_HIGH);   
+}
 
 PyMODINIT_FUNC
 init_picam(void)
@@ -382,6 +402,7 @@ init_picam(void)
     setupAWBConstants(module);
     setupMeteringConstants(module);
     setupImageFXConstants(module);
+    setupVideoProfileConstants(module);
     picamConfig = picam_newconfig();
     Py_INCREF(picamConfig);
     PyModule_AddObject(module, "config", (PyObject *)picamConfig); 
