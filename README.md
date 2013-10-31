@@ -65,6 +65,15 @@ Download the  folder and run the setup command to install the script
     pip install https://github.com/ashtons/picam/zipball/master#egg=picam
 
 
+Upgrade Firmare
+----------------
+Update the firmware (some functions are only available in the newer firmware versions)
+    
+    sudo apt-get install rpi-update
+    
+    sudo rpi-update
+    
+    
 Make sure the decessary dependencies are installed and the latest versions
 
     sudo apt-get update
@@ -76,6 +85,15 @@ Make sure the decessary dependencies are installed and the latest versions
     raspistill -o /tmp/test.jpg
     
     
+Troubleshooting
+---------------
+If you see an error message similar to the following
+
+    mmal: mmal_vc_port_parameter_set: failed to set port parameter 64:0:ENOSYS
+    
+    mmal: Function not implemented
+    
+then you need to update your firmware
 
 Constants
 ------------
