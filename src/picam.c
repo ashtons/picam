@@ -65,6 +65,8 @@ typedef struct
    int bitrate;                        /// Requested bitrate
    int framerate;                      /// Requested frame rate (fps)
    int intraperiod;                    /// Intra-refresh period (key frame rate)
+   int quantisationParameter;          /// Quantisation parameter - quality. Set bitrate 0 and set this for variable bitrate
+   int inlineHeaders;                  /// Insert inline headers to stream (SPS, PPS)
    int profile;                        /// H264 profile to use for encoding
    char *filename;                     /// filename of output file
    int immutableInput; 
@@ -121,6 +123,8 @@ static void default_status(RASPISTILL_STATE *state)
    state->framerate = VIDEO_FRAME_RATE_NUM;
    state->immutableInput = 0;
    state->intraperiod = 0;    // Not set
+   state->quantisationParameter = 0;
+   state->inlineHeaders = 0;
    state->profile = MMAL_VIDEO_PROFILE_H264_HIGH;
 
    state->camera_component = NULL;
@@ -569,6 +573,24 @@ static MMAL_STATUS_T create_video_encoder_component(RASPISTILL_STATE *state)
       }
 
    }
+   if (state->quantisationParameter)
+   {
+      MMAL_PARAMETER_UINT32_T param = {{ MMAL_PARAMETER_VIDEO_ENCODE_INITIAL_QUANT, sizeof(param)}, state->quantisationParameter};
+      status = mmal_port_parameter_set(encoder_output, &param.hdr);
+      if (status != MMAL_SUCCESS)
+      {
+         vcos_log_error("Unable to set QP");
+         goto error;
+      }
+
+      MMAL_PARAMETER_UINT32_T param2 = {{ MMAL_PARAMETER_VIDEO_ENCODE_QP_P, sizeof(param)}, state->quantisationParameter+6};
+      status = mmal_port_parameter_set(encoder_output, &param2.hdr);
+      if (status != MMAL_SUCCESS)
+      {
+         vcos_log_error("Unable to set QP");
+         goto error;
+      }
+   }
    {
       MMAL_PARAMETER_VIDEO_PROFILE_T  param;
       param.hdr.id = MMAL_PARAMETER_PROFILE;
@@ -588,7 +610,13 @@ static MMAL_STATUS_T create_video_encoder_component(RASPISTILL_STATE *state)
       vcos_log_error("Unable to set immutable input flag");
       // Continue rather than abort..
    }
-
+   
+   //set INLINE HEADER flag to generate SPS and PPS for every IDR if requested
+   if (mmal_port_parameter_set_boolean(encoder_output, MMAL_PARAMETER_VIDEO_ENCODE_INLINE_HEADER, state->inlineHeaders) != MMAL_SUCCESS)
+   {
+      vcos_log_error("failed to set INLINE HEADER FLAG parameters");
+      // Continue rather than abort..
+   }
    //  Enable component
    status = mmal_component_enable(encoder);
 
@@ -891,6 +919,8 @@ void internelVideoWithDetails(char *filename, int width, int height, int duratio
    state.bitrate = parms->videoBitrate;
    state.framerate = parms->videoFramerate;
    state.profile = parms->videoProfile;
+   state.quantisationParameter = parms->quantisationParameter;
+   state.inlineHeaders = parms->inlineHeaders;
    
    state.camera_parameters.exposureMode = parms->exposure;
    state.camera_parameters.exposureMeterMode = parms->meterMode;

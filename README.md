@@ -59,6 +59,9 @@ Returns a PIL Image object
     picam.config.videoFramerate = 15
     picam.config.videoBitrate = 17000000
     
+    picam.config.inlineHeaders = 0         # Insert inline headers to stream (SPS, PPS), 0 or 1
+    picam.config.quantisationParameter = 0 # Quantisation parameter - quality. Set bitrate 0 and set this for variable bitrate
+    
     
 Installation
 ------------

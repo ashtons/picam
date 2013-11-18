@@ -31,6 +31,8 @@ typedef struct {
     int videoProfile;       //  MMAL_VIDEO_PROFILE_H264_HIGH
     int videoBitrate;
     int videoFramerate;     //30
+    int quantisationParameter;          // Quantisation parameter - quality. Set bitrate 0 and set this for variable bitrate
+    int inlineHeaders;                  // Insert inline headers to stream (SPS, PPS)
 } _PicamConfig;
 
 static void PicamConfig_dealloc(_PicamConfig* self) {    
@@ -64,6 +66,8 @@ static PyObject *Picam_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
         self->videoProfile = MMAL_VIDEO_PROFILE_H264_HIGH;
         self->videoBitrate = 17000000;
         self->videoFramerate = 30;
+        self->quantisationParameter = 0;
+        self->inlineHeaders = 0;
     }
     return (PyObject *)self;
 }
@@ -86,6 +90,8 @@ static PyMemberDef PicamConfig_members[] = {
     {"videoProfile",  T_INT, offsetof(_PicamConfig, videoProfile), 0, "videoProfile"},  
     {"videoBitrate",  T_INT, offsetof(_PicamConfig, videoBitrate), 0, "videoBitrate"},  
     {"videoFramerate",  T_INT, offsetof(_PicamConfig, videoFramerate), 0, "videoFramerate"},  
+    {"quantisationParameter", T_INT, offsetof(_PicamConfig, quantisationParameter), 0, "quantisationParameter"},  
+    {"inlineHeaders", T_INT, offsetof(_PicamConfig, inlineHeaders), 0, "inlineHeaders"},  
     {NULL}  /* Sentinel */
 };
 static PyTypeObject PicamConfigType = {
@@ -152,6 +158,8 @@ static _PicamConfig* picam_newconfig()
         o->videoProfile = MMAL_VIDEO_PROFILE_H264_HIGH;
         o->videoBitrate = 17000000;
         o->videoFramerate = 30;
+        o->quantisationParameter = 0;
+        o->inlineHeaders = 0;
     }    
     return o;
 }
@@ -185,6 +193,8 @@ static void fillParms(PicamParams *parms) {
     parms->videoProfile = picamConfig->videoProfile;
     parms->videoBitrate = picamConfig->videoBitrate;
     parms->videoFramerate = picamConfig->videoFramerate;
+    parms->quantisationParameter = picamConfig->quantisationParameter;
+    parms->inlineHeaders = picamConfig->inlineHeaders;
 }
 
 static PyObject * picam_takephoto(PyObject *self, PyObject *args) {

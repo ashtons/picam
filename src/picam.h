@@ -22,6 +22,8 @@ typedef struct {
     int videoProfile;
     int videoBitrate;           //17000000
     int videoFramerate;         //30
+    int quantisationParameter;  //0
+    int inlineHeaders;                  /// Insert inline headers to stream (SPS, PPS)
 } PicamParams;
 
 uint8_t *takePhoto(PicamParams *parms, long *sizeread);
