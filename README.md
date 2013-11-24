@@ -67,11 +67,11 @@ Installation
 ------------
 Download the  folder and run the setup command to install the script
 
-    python setup.py install
+    sudo python setup.py install
     
     or
 
-    pip install https://github.com/ashtons/picam/zipball/master#egg=picam
+    sudo pip install https://github.com/ashtons/picam/zipball/master#egg=picam
 
 
 Upgrade Firmware
