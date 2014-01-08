@@ -93,6 +93,7 @@ Make sure the necessary dependencies are installed and the latest versions
     
     raspistill -o /tmp/test.jpg
     
+    sudo apt-get install python-imaging-tk
     
 Troubleshooting
 ---------------
