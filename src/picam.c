@@ -774,6 +774,10 @@ uint8_t *internelPhotoWithDetails(int width, int height, int quality,MMAL_FOURCC
    state.camera_parameters.hflip = parms->hflip;
    state.camera_parameters.vflip = parms->vflip;
    state.camera_parameters.shutter_speed = parms->shutter_speed;  
+   state.camera_parameters.roi.x = parms->roi[0];
+   state.camera_parameters.roi.y = parms->roi[1];
+   state.camera_parameters.roi.w = parms->roi[2];
+   state.camera_parameters.roi.h = parms->roi[3];
    
    MMAL_COMPONENT_T *preview = 0;
    
@@ -937,6 +941,10 @@ void internelVideoWithDetails(char *filename, int width, int height, int duratio
    state.camera_parameters.hflip = parms->hflip;
    state.camera_parameters.vflip = parms->vflip;
    state.camera_parameters.shutter_speed = parms->shutter_speed;  
+   state.camera_parameters.roi.x = parms->roi[0];
+   state.camera_parameters.roi.y = parms->roi[1];
+   state.camera_parameters.roi.w = parms->roi[2];
+   state.camera_parameters.roi.h = parms->roi[3];
    
    if ((status = create_video_camera_component(&state)) != MMAL_SUCCESS) {       
       vcos_log_error("%s: Failed to create camera component", __func__);

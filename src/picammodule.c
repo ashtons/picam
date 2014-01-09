@@ -33,6 +33,7 @@ typedef struct {
     int videoFramerate;     //30
     int quantisationParameter;          // Quantisation parameter - quality. Set bitrate 0 and set this for variable bitrate
     int inlineHeaders;                  // Insert inline headers to stream (SPS, PPS)
+    PyObject *roi;
 } _PicamConfig;
 
 static void PicamConfig_dealloc(_PicamConfig* self) {    
@@ -68,6 +69,13 @@ static PyObject *Picam_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
         self->videoFramerate = 30;
         self->quantisationParameter = 0;
         self->inlineHeaders = 0;
+        self->roi = PyList_New(4);
+        PyList_SetItem(self->roi, 0,PyFloat_FromDouble(0));
+        PyList_SetItem(self->roi, 1, PyFloat_FromDouble(0));
+        PyList_SetItem(self->roi, 2, PyFloat_FromDouble(1.0)); 
+        PyList_SetItem(self->roi, 3, PyFloat_FromDouble(1.0)); 
+        
+        
     }
     return (PyObject *)self;
 }
@@ -92,6 +100,7 @@ static PyMemberDef PicamConfig_members[] = {
     {"videoFramerate",  T_INT, offsetof(_PicamConfig, videoFramerate), 0, "videoFramerate"},  
     {"quantisationParameter", T_INT, offsetof(_PicamConfig, quantisationParameter), 0, "quantisationParameter"},  
     {"inlineHeaders", T_INT, offsetof(_PicamConfig, inlineHeaders), 0, "inlineHeaders"},  
+    {"roi", T_OBJECT, offsetof(_PicamConfig, roi), 0, "roi"},  
     {NULL}  /* Sentinel */
 };
 static PyTypeObject PicamConfigType = {
@@ -160,6 +169,11 @@ static _PicamConfig* picam_newconfig()
         o->videoFramerate = 30;
         o->quantisationParameter = 0;
         o->inlineHeaders = 0;
+        o->roi = PyList_New(4);
+        PyList_SetItem(o->roi, 0,PyFloat_FromDouble(0));
+        PyList_SetItem(o->roi, 1, PyFloat_FromDouble(0));
+        PyList_SetItem(o->roi, 2, PyFloat_FromDouble(1.0)); 
+        PyList_SetItem(o->roi, 3, PyFloat_FromDouble(1.0)); 
     }    
     return o;
 }
@@ -195,6 +209,27 @@ static void fillParms(PicamParams *parms) {
     parms->videoFramerate = picamConfig->videoFramerate;
     parms->quantisationParameter = picamConfig->quantisationParameter;
     parms->inlineHeaders = picamConfig->inlineHeaders;
+    parms->roi[0] = PyFloat_AsDouble(PyList_GetItem(picamConfig->roi, 0));
+    parms->roi[1] = PyFloat_AsDouble(PyList_GetItem(picamConfig->roi, 1));;
+    parms->roi[2] = PyFloat_AsDouble(PyList_GetItem(picamConfig->roi, 2));;
+    parms->roi[3] = PyFloat_AsDouble(PyList_GetItem(picamConfig->roi, 3));;
+    if (parms->roi[0] > 1.0) {
+        parms->roi[0] = 0.0;
+    }
+    if (parms->roi[1] > 1.0) {
+        parms->roi[1] = 0.0;
+    }
+    if (parms->roi[2] > 1.0) {
+        parms->roi[2] = 1.0;
+    }
+    if (parms->roi[3] > 1.0) {
+        parms->roi[3] = 1.0;
+    }
+    if (parms->roi[0] + parms->roi[2] > 1.0)
+        parms->roi[2] = 1 - parms->roi[0];
+
+    if (parms->roi[1] + parms->roi[3] > 1.0)
+        parms->roi[3] = 1 - parms->roi[1];
 }
 
 static PyObject * picam_takephoto(PyObject *self, PyObject *args) {

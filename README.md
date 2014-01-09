@@ -62,6 +62,8 @@ Returns a PIL Image object
     picam.config.inlineHeaders = 0         # Insert inline headers to stream (SPS, PPS), 0 or 1
     picam.config.quantisationParameter = 0 # Quantisation parameter - quality. Set bitrate 0 and set this for variable bitrate
     
+    picam.config.roi = [0.0,0.0,0.5,0.5]  # Region of interest, normalised coordinates (0.0 - 1.0).
+    picam.config.roi = [0.5,0.5,0.25,0.25]
     
 Installation
 ------------
