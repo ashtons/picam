@@ -70,9 +70,9 @@ Installation
 
 This extension depends on the Userland libraries, so they need to be installed first
 
-    apt-get install cmake
-    apt-get install python-dev
-    apt-get install python-imaging
+    sudo apt-get install cmake
+    sudo apt-get install python-dev
+    sudo apt-get install python-imaging
     
     git clone https://github.com/raspberrypi/userland.git
     cd userland
