@@ -67,6 +67,17 @@ Returns a PIL Image object
     
 Installation
 ------------
+
+This extension depends on the Userland libraries, so they need to be installed first
+
+    apt-get install cmake
+    apt-get install python-dev
+    apt-get install python-imaging
+    
+    git clone https://github.com/raspberrypi/userland.git
+    cd userland
+    ./buildme
+
 Download the  folder and run the setup command to install the script
 
     sudo python setup.py install

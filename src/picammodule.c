@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "picam.h"
-#include "encode.h"
 #include "interface/mmal/mmal.h"
 
 #define CLAMP(x, low, high)  (((x) > (high)) ? (high) : (((x) < (low)) ? (low) : (x)))
