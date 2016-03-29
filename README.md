@@ -116,7 +116,11 @@ If you see an error message similar to the following
     
     mmal: Function not implemented
     
-then you need to update your firmware
+then you need to update your firmware.
+
+    mmal: main: Failed to create camera component
+    
+this error probably indicates that the camera hasn't been plugged in correctly.
 
 Constants
 ------------
